@@ -25,10 +25,11 @@ trackMenu_t::trackMenu_t ()
     m_menu = ftxui::Menu (&m_trackStr, &m_selected, mo);
 }
 
-void trackMenu_t::selectArtist (muuid::uuid const &id_)
+void trackMenu_t::selectAlbum (muuid::uuid const &id_)
 {
     m_trackStr.clear ();
     m_trackId.clear ();
+    m_selected = 0;
 
     auto ai = clipod::DB ()->albumTrackInfo (id_);
 
@@ -55,5 +56,5 @@ bool trackMenu_t::OnEvent (ftxui::Event event_)
 
 void trackMenu_t::onEnter ()
 {
-    trackSelected (m_trackId.at (m_selected));
+    trackSelected (m_trackId, m_selected);
 }

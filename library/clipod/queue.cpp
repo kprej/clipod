@@ -13,6 +13,17 @@ queue_t::queue_t ()
 {
 }
 
+void queue_t::enqueue (std::span<muuid::uuid> album_, int startPos_)
+{
+    m_queue.clear ();
+
+    m_queue.insert (m_queue.end (), album_.cbegin (), album_.cend ());
+
+    m_currentPos = m_queue.begin () + startPos_;
+
+    queueUpdated (m_queue);
+}
+
 void queue_t::enqueue (muuid::uuid const &track_)
 {
     auto dist = std::distance (m_queue.begin (), m_currentPos);
@@ -24,7 +35,7 @@ void queue_t::enqueue (muuid::uuid const &track_)
     queueUpdated (m_queue);
 }
 
-void queue_t::enqueue (std::vector<muuid::uuid> const &track_)
+void queue_t::enqueue (std::span<muuid::uuid> track_)
 {
     auto dist = std::distance (m_queue.begin (), m_currentPos);
 

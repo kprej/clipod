@@ -5,6 +5,7 @@
 
 #include <alc.h>
 
+#include <chrono>
 #include <modern-uuid/uuid.h>
 
 #include <fileref.h>
@@ -50,6 +51,8 @@ public:
 private:
     void updateNowPlayingInfo ();
 
+    void readyUpNextTrack ();
+
     bool playNext ();
     bool playPrev ();
 
@@ -61,5 +64,7 @@ private:
     trackInfo_t m_trackInfo;
     std::shared_ptr<soundBuffer_t> m_nowPlaying;
     std::shared_ptr<soundBuffer_t> m_nextTrack;
+
+    timer_t m_nextUpTimer;
 };
 } // namespace clipod

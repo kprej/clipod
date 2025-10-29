@@ -15,13 +15,13 @@ public:
     ~trackMenu_t ();
     trackMenu_t ();
 
-    void selectArtist (muuid::uuid const &id_);
+    void selectAlbum (muuid::uuid const &id_);
 
     ftxui::Element OnRender () override;
 
     bool OnEvent (ftxui::Event event_) override;
 
-    sigslot::signal<muuid::uuid> trackSelected;
+    sigslot::signal<std::span<muuid::uuid>, int> trackSelected;
 
 private:
     void onEnter ();

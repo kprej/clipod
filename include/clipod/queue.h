@@ -15,8 +15,9 @@ public:
     ~queue_t ();
     queue_t ();
 
+    void enqueue (std::span<muuid::uuid> album_, int startTrack_);
     void enqueue (muuid::uuid const &track_);
-    void enqueue (std::vector<muuid::uuid> const &tracks_);
+    void enqueue (std::span<muuid::uuid> tracks_);
 
     muuid::uuid const &pop ();
 

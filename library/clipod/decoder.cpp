@@ -33,10 +33,8 @@ decoder_t::~decoder_t ()
 }
 
 decoder_t::decoder_t (std::shared_ptr<buffer_t> buffer_)
-    : m_mutex ()
-    , buffer (buffer_)
-    , m_stop (false)
-    , m_running (true)
+    : m_frames ()
+    , m_buffer (buffer_)
     , m_path ()
     , m_streamIndex (0)
     , m_formatContext (nullptr)
@@ -188,88 +186,57 @@ void decoder_t::setPath (std::filesystem::path const &path_)
     if (static_cast<AVSampleFormat> (m_stream->codecpar->format) != AV_SAMPLE_FMT_S16)
         data_size /= 2;
 
-    buffer->m_data.resize (data_size);
-    buffer->m_remainingFrames = data_size;
+    m_buffer->m_data.resize (data_size);
+    m_buffer->m_remainingFrames = data_size;
     avformat_close_input (&m_formatContext);
 }
 
-void decoder_t::decodeFrames ()
+void decoder_t::decodeFrames (std::stop_token stoken_)
 {
-    int ret;
-    while (true)
+    while (!stoken_.stop_requested ())
     {
-        if (shouldStop ())
+        if (m_frames.empty ())
             break;
 
-        AVFrame *frame = nullptr;
-        {
-            std::lock_guard<std::mutex> frameLock (m_framesMutex);
-            if (m_frames.empty ())
-                break;
-
-            frame = m_frames.front ();
-            m_frames.pop ();
-        }
-
-        AVFrame *resampled_frame = av_frame_alloc ();
-        resampled_frame->sample_rate = dst_rate;
-        resampled_frame->ch_layout = dst_ch_layout;
-        resampled_frame->format = dst_sample_fmt;
-
-        ret = swr_convert_frame (m_swrContext, resampled_frame, frame);
-
-        auto data_size = av_samples_get_buffer_size (
-            NULL,
-            resampled_frame->ch_layout.nb_channels,
-            resampled_frame->nb_samples,
-            static_cast<AVSampleFormat> (resampled_frame->format),
-            0);
-
-        for (auto i = 0; i < data_size; ++i)
-            buffer->m_data[m_dataPos + i] = resampled_frame->data[0][i];
-
-        m_dataPos += data_size;
-
-        av_frame_free (&frame);
-        av_free (frame);
-
-        av_frame_free (&resampled_frame);
-        av_free (resampled_frame);
+        processFrame ();
     }
 
     avcodec_free_context (&m_decoderContext);
     av_free (m_decoderContext);
     swr_free (&m_swrContext);
     av_free (m_swrContext);
-
-    std::lock_guard<std::mutex> lock (m_stopMutex);
-    m_running = false;
-}
-
-void decoder_t::stop ()
-{
-    std::lock_guard<std::mutex> lock (m_stopMutex);
-    m_stop = true;
-}
-
-bool decoder_t::shouldStop ()
-{
-    std::lock_guard<std::mutex> lock (m_stopMutex);
-    return m_stop;
-}
-
-bool decoder_t::running ()
-{
-    std::lock_guard<std::mutex> lock (m_stopMutex);
-    return m_running;
-}
-
-size_t decoder_t::remainingFrames ()
-{
-    std::lock_guard<std::mutex> frameLock (m_framesMutex);
-    return m_frames.size ();
 }
 
 void decoder_t::processFrame ()
 {
+    int ret;
+
+    AVFrame *frame = nullptr;
+    frame = m_frames.front ();
+    m_frames.pop ();
+
+    AVFrame *resampled_frame = av_frame_alloc ();
+    resampled_frame->sample_rate = dst_rate;
+    resampled_frame->ch_layout = dst_ch_layout;
+    resampled_frame->format = dst_sample_fmt;
+
+    ret = swr_convert_frame (m_swrContext, resampled_frame, frame);
+
+    auto data_size =
+        av_samples_get_buffer_size (NULL,
+                                    resampled_frame->ch_layout.nb_channels,
+                                    resampled_frame->nb_samples,
+                                    static_cast<AVSampleFormat> (resampled_frame->format),
+                                    0);
+
+    for (auto i = 0; i < data_size; ++i)
+        m_buffer->m_data[m_dataPos + i] = resampled_frame->data[0][i];
+
+    m_dataPos += data_size;
+
+    av_frame_free (&frame);
+    av_free (frame);
+
+    av_frame_free (&resampled_frame);
+    av_free (resampled_frame);
 }

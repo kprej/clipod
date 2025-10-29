@@ -17,6 +17,11 @@ playback_t::~playback_t ()
 
 playback_t::playback_t ()
     : currentState (STOPPED)
+    , m_device (nullptr)
+    , m_context (nullptr)
+    , m_trackInfo ()
+    , m_nowPlaying (nullptr)
+    , m_nextTrack (nullptr)
 {
     m_device = alcOpenDevice (nullptr);
     m_context = alcCreateContext (m_device, nullptr);
@@ -32,7 +37,7 @@ playback_t::playback_t ()
 void playback_t::unload ()
 {
     if (m_nowPlaying)
-        m_nowPlaying->unload ();
+        m_nowPlaying->stop ();
 
     alcDestroyContext (m_context);
     alcCloseDevice (m_device);
@@ -158,6 +163,20 @@ void playback_t::updateNowPlayingInfo ()
     m_trackInfo.queuePos = QU ()->pos ();
 
     nowPlaying (m_trackInfo);
+}
+
+void playback_t::readyUpNextTrack ()
+{
+    auto id = QU ()->lookAhead ();
+
+    if (!id)
+    {
+        return;
+    }
+
+    auto next = loadBuffer (id.value ());
+
+    m_nextTrack = next;
 }
 
 bool playback_t::playNext ()

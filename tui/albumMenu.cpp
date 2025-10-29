@@ -29,6 +29,7 @@ void albumMenu_t::selectArtist (muuid::uuid const &id_)
 {
     m_albumStr.clear ();
     m_albumId.clear ();
+    m_selected = 0;
 
     auto ai = clipod::DB ()->artistAlbumsInfo (id_);
 

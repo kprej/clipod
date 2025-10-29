@@ -25,7 +25,6 @@ extern "C"
 #include <AL/alext.h>
 
 #include <memory>
-#include <optional>
 #include <ranges>
 
 AVSampleFormat OUT_FORMAT = AV_SAMPLE_FMT_S16;
@@ -88,7 +87,7 @@ soundBuffer_t::soundBuffer_t (muuid::uuid const &trackId_)
     , m_timePoint ()
     , m_currentFrame (0)
     , m_data (std::make_shared<buffer_t> ())
-    , m_decoderThread (std::nullopt)
+    , m_decoderThread ()
     , m_decoder ()
 {
     auto db = brain_t::bb ()->db;
@@ -115,9 +114,6 @@ ALsizei soundBuffer_t::bufferCallback (void *data_, ALsizei size_)
 {
     auto read = m_data->callback (data_, size_);
 
-    if (m_data->percentRemaining () >= 10.f)
-        nearEOT ();
-
     return read;
 }
 
@@ -129,7 +125,7 @@ void soundBuffer_t::play ()
 
 void soundBuffer_t::pause ()
 {
-    alSourceStop (m_alSource);
+    alSourcePause (m_alSource);
 }
 
 void soundBuffer_t::seek (int seek_)
@@ -150,7 +146,7 @@ void soundBuffer_t::load ()
 {
     m_decoder = std::make_unique<decoder_t> (m_data);
     m_decoder->setPath (m_path);
-    m_decoderThread = std::thread (&decoder_t::decodeFrames, m_decoder.get ());
+    m_decoderThread = std::jthread (&decoder_t::decodeFrames, m_decoder.get ());
 
     alGenBuffers (1, &m_alBuffer);
     alGenSources (1, &m_alSource);
@@ -184,14 +180,11 @@ void soundBuffer_t::stop ()
     alDeleteSources (1, &m_alSource);
     alDeleteBuffers (1, &m_alBuffer);
 
-    if (m_decoderThread && m_decoderThread->joinable ())
-        m_decoderThread->join ();
+    if (m_decoderThread.joinable ())
+    {
+        m_decoderThread.request_stop ();
+        m_decoderThread.join ();
+    }
 
     m_decoder.reset ();
-}
-
-void soundBuffer_t::unload ()
-{
-    if (m_decoderThread && m_decoderThread->joinable ())
-        m_decoderThread->join ();
 }

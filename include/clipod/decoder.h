@@ -10,6 +10,7 @@ extern "C"
 #include <filesystem>
 #include <mutex>
 #include <queue>
+#include <thread>
 
 namespace clipod
 {
@@ -23,23 +24,17 @@ public:
 
     void setPath (std::filesystem::path const &path_);
 
-    void decodeFrames ();
-    void stop ();
-    bool shouldStop ();
+    void decodeFrames (std::stop_token stoken_);
     bool running ();
     size_t remainingFrames ();
-    std::queue<AVFrame *> m_frames;
-
-    mutable std::mutex m_mutex;
-    std::shared_ptr<buffer_t> buffer;
 
 private:
     void processFrame ();
 
-    std::mutex m_stopMutex;
-    bool m_stop;
+    std::queue<AVFrame *> m_frames;
 
-    bool m_running;
+    std::shared_ptr<buffer_t> m_buffer;
+
     std::filesystem::path m_path;
     int m_streamIndex;
     AVFormatContext *m_formatContext;
@@ -52,7 +47,6 @@ private:
     AVChannelLayout dst_ch_layout = AV_CHANNEL_LAYOUT_STEREO;
     enum AVSampleFormat dst_sample_fmt = AV_SAMPLE_FMT_S16;
 
-    std::mutex m_framesMutex;
     size_t m_dataPos;
 };
 } // namespace clipod

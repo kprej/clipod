@@ -35,16 +35,16 @@ public:
 
     muuid::uuid const &id () const;
 
-    sigslot::signal<> nearEOT;
     std::chrono::duration<float> const &timePoint () const;
 
     void play ();
     void pause ();
+
     void seek (int seek_);
     void seek (std::chrono::duration<float> seek_);
+
     void load ();
     void stop ();
-    void unload ();
 
 private:
     ALsizei bufferCallback (void *data_, ALsizei size_);
@@ -61,7 +61,7 @@ private:
     size_t m_currentFrame;
     std::shared_ptr<buffer_t> m_data;
 
-    std::optional<std::thread> m_decoderThread;
+    std::jthread m_decoderThread;
     std::unique_ptr<decoder_t> m_decoder;
 };
 

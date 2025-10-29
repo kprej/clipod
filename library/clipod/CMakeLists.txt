@@ -17,6 +17,7 @@ add_library(
     ${HPATH}/playback.h
     ${HPATH}/queue.h
     ${HPATH}/soundBuffer.h
+    ${HPATH}/timer.h
     ${HPATH}/track.h
 
     album.cpp
@@ -27,6 +28,7 @@ add_library(
     playback.cpp
     queue.cpp
     soundBuffer.cpp
+    timer.cpp
     track.cpp
 )
 

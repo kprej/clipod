@@ -54,8 +54,17 @@ uiLoop_t::uiLoop_t ()
         [this] (muuid::uuid const &id_)
         {
             m_previousPages.push_back (m_currentPage);
-            m_trackMenu->selectArtist (id_);
+            m_trackMenu->selectAlbum (id_);
             m_currentPage = m_trackMenu;
+        });
+
+    m_trackMenu->trackSelected.connect (
+        [this] (std::span<muuid::uuid> album_, int startPos_)
+        {
+            m_previousPages.push_back (m_currentPage);
+            clipod::QU ()->enqueue (album_, startPos_);
+            clipod::PB ()->play ();
+            m_currentPage = m_nowPlaying;
         });
 
     m_component = Renderer (
