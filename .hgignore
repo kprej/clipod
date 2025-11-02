@@ -1,0 +1,21 @@
+syntax: glob
+.cache
+bazel-*
+compile_commands.json
+external
+*.orig
+vgcore.*
+*.ogg
+_deps
+bin
+lib
+CMakeFiles/
+CMakeCache.txt
+*.a
+cmake_install.cmake
+Makefile
+build*
+.vs
+Music
+media.db
+logs/

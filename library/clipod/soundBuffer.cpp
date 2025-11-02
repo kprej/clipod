@@ -144,9 +144,10 @@ void soundBuffer_t::seek (int seek_)
 
 void soundBuffer_t::load ()
 {
-    m_decoder = std::make_unique<decoder_t> (m_data);
+    m_decoder = std::make_shared<decoder_t> (m_data);
     m_decoder->setPath (m_path);
-    m_decoderThread = std::jthread (&decoder_t::decodeFrames, m_decoder.get ());
+    m_decoderThread = std::jthread ([this] (std::stop_token stoken_)
+                                    { m_decoder->decodeFrames (stoken_); });
 
     alGenBuffers (1, &m_alBuffer);
     alGenSources (1, &m_alSource);

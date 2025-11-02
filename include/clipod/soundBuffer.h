@@ -62,7 +62,7 @@ private:
     std::shared_ptr<buffer_t> m_data;
 
     std::jthread m_decoderThread;
-    std::unique_ptr<decoder_t> m_decoder;
+    std::shared_ptr<decoder_t> m_decoder;
 };
 
 } // namespace clipod

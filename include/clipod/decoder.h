@@ -8,7 +8,6 @@ extern "C"
 }
 
 #include <filesystem>
-#include <mutex>
 #include <queue>
 #include <thread>
 

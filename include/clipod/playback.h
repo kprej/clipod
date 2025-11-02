@@ -1,6 +1,7 @@
 #pragma once
 
 #include "clipod/soundBuffer.h"
+#include "clipod/timer.h"
 #include "clipod/track.h"
 
 #include <alc.h>
