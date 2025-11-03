@@ -7,8 +7,6 @@ Play music from your terminal.
 A simple cross-playform cli/tui music player side project.
 >>This project is a massive WIP. Use it to look at my messy code as I clean up and change ideas etc.
 
-![Artist View] (/screenshots/ArtistView.png?raw=true "Artist View")
-![Now Playing] (/screenshots/playback.png?raw=true "Playback")
 ## Getting Started
 
 ### Dependencies

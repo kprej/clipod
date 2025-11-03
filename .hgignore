@@ -19,3 +19,5 @@ build*
 Music
 media.db
 logs/
+vcpkg_installed
+.git
