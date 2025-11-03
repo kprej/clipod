@@ -18,6 +18,7 @@ public:
 
     sigslot::signal<> gotoArtistPage;
     sigslot::signal<> gotoAlbumPage;
+    sigslot::signal<> gotoSettingsPage;
 
 private:
     void onEnter ();

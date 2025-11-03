@@ -16,6 +16,7 @@ add_library(
     ${HPATH}/decoder.h
     ${HPATH}/playback.h
     ${HPATH}/queue.h
+    ${HPATH}/settings.h
     ${HPATH}/soundBuffer.h
     ${HPATH}/timer.h
     ${HPATH}/track.h
@@ -27,6 +28,7 @@ add_library(
     decoder.cpp
     playback.cpp
     queue.cpp
+    settings.cpp
     soundBuffer.cpp
     timer.cpp
     track.cpp
@@ -62,6 +64,7 @@ target_link_libraries(
     modern-uuid::modern-uuid-static
     OpenAL
     tag
+    tomlplusplus::tomlplusplus
     avdevice
     avformat
     avfilter

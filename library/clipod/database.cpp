@@ -19,51 +19,58 @@ database_t::database_t ()
 
 void database_t::scanDirectory (std::filesystem::path const &path_, bool recursive_)
 {
-    bool createTables = !std::filesystem::exists ("media.db");
-
-    auto m_db =
-        SQLite::Database ("media.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-
-    if (createTables)
+    try
     {
-        m_db.exec ("CREATE TABLE IF NOT EXISTS ARTISTS("
-                   "ID BLOB PRIMARY KEY     NOT NULL,"
-                   "NAME           TEXT     NOT NULL,"
-                   "UNIQUE(NAME));");
+        bool createTables = !std::filesystem::exists ("media.db");
 
-        m_db.exec ("CREATE TABLE IF NOT EXISTS ALBUMS("
-                   "ID BLOB PRIMARY KEY     NOT NULL,"
-                   "ARTISTID        BLOB    NOT NULL,"
-                   "NAME           TEXT     NOT NULL,"
-                   "FOREIGN KEY (ARTISTID)  REFERENCES ARTIST(ID),"
-                   "UNIQUE(NAME));");
+        auto m_db =
+            SQLite::Database ("media.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 
-        m_db.exec (CREATE_TRACK_TABLE);
-    }
+        if (createTables)
+        {
+            m_db.exec ("CREATE TABLE IF NOT EXISTS ARTISTS("
+                       "ID BLOB PRIMARY KEY     NOT NULL,"
+                       "NAME           TEXT     NOT NULL,"
+                       "UNIQUE(NAME));");
 
-    auto const currentPath = std::filesystem::current_path ();
-    spdlog::debug ("Scanning: {}", path_.string ());
-    std::filesystem::current_path (path_);
+            m_db.exec ("CREATE TABLE IF NOT EXISTS ALBUMS("
+                       "ID BLOB PRIMARY KEY     NOT NULL,"
+                       "ARTISTID        BLOB    NOT NULL,"
+                       "NAME           TEXT     NOT NULL,"
+                       "FOREIGN KEY (ARTISTID)  REFERENCES ARTIST(ID),"
+                       "UNIQUE(NAME));");
 
-    auto transaction = SQLite::Transaction (m_db);
-    if (recursive_)
-    {
-        for (auto const &dirIter : std::filesystem::recursive_directory_iterator (
-                 std::filesystem::current_path ()))
+            m_db.exec (CREATE_TRACK_TABLE);
+        }
+
+        auto const currentPath = std::filesystem::current_path ();
+        spdlog::debug ("Scanning: {}", path_.string ());
+        std::filesystem::current_path (path_);
+
+        auto transaction = SQLite::Transaction (m_db);
+        if (recursive_)
+        {
+            for (auto const &dirIter : std::filesystem::recursive_directory_iterator (
+                     std::filesystem::current_path ()))
+            {
+                processDirectoryEntry (dirIter, m_db);
+            }
+            transaction.commit ();
+            return;
+        }
+
+        for (auto const &dirIter :
+             std::filesystem::directory_iterator (std::filesystem::current_path ()))
         {
             processDirectoryEntry (dirIter, m_db);
         }
+        std::filesystem::current_path (currentPath);
         transaction.commit ();
-        return;
     }
-
-    for (auto const &dirIter :
-         std::filesystem::directory_iterator (std::filesystem::current_path ()))
+    catch (std::exception e_)
     {
-        processDirectoryEntry (dirIter, m_db);
+        spdlog::error ("{}", e_.what ());
     }
-    std::filesystem::current_path (currentPath);
-    transaction.commit ();
 }
 
 void database_t::validateDatabase ()
@@ -111,7 +118,7 @@ transaction_t database_t::raiiTransaction ()
 
 void database_t::addTrack (track_t const &track_, SQLite::Database &db_)
 {
-    spdlog::debug ("Adding: {}", track_.title);
+    spdlog::debug ("Adding track: {}", track_.title);
     auto m_insertTrack = SQLite::Statement (db_, INSERT_TRACK);
     track_.bindSQL (m_insertTrack);
     m_insertTrack.exec ();
@@ -121,6 +128,7 @@ void database_t::addTrack (track_t const &track_, SQLite::Database &db_)
 
 void database_t::addArtist (artist_t const &artist_, SQLite::Database &db_)
 {
+    spdlog::debug ("Adding artist: {}", artist_.name);
     auto m_insertArtist = SQLite::Statement (
         db_, "INSERT OR IGNORE INTO ARTISTS VALUES(?, ?) ON CONFLICT(NAME) DO NOTHING;");
     m_insertArtist.bind (
@@ -134,15 +142,16 @@ void database_t::addArtist (artist_t const &artist_, SQLite::Database &db_)
 
 void database_t::addAlbum (album_t const &album_, SQLite::Database &db_)
 {
+    spdlog::debug ("Adding album: {}", album_.name);
     auto m_insertAlbum = SQLite::Statement (
         db_,
         "INSERT OR IGNORE INTO ALBUMS VALUES(?, ?, ?) ON CONFLICT(NAME) DO NOTHING;");
 
-    m_insertAlbum.bind (album_t::C_ID, album_.id.bytes.data (), album_.id.bytes.size ());
-    m_insertAlbum.bind (album_t::C_ARTISTID,
+    m_insertAlbum.bind (album_t::F_ID, album_.id.bytes.data (), album_.id.bytes.size ());
+    m_insertAlbum.bind (album_t::F_ARTISTID,
                         album_.artist.id.bytes.data (),
                         album_.artist.id.bytes.size ());
-    m_insertAlbum.bind (album_t::C_NAME, album_.name);
+    m_insertAlbum.bind (album_t::F_NAME, album_.name);
 
     m_insertAlbum.exec ();
     m_insertAlbum.clearBindings ();

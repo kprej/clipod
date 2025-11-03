@@ -22,6 +22,7 @@ uiLoop_t::uiLoop_t ()
     , m_artistMenu (std::make_shared<artistMenu_t> ())
     , m_albumMenu (std::make_shared<albumMenu_t> ())
     , m_trackMenu (std::make_shared<trackMenu_t> ())
+    , m_settingsMenu (std::make_shared<settingsMenu_t> ())
     , m_playbackControls (std::make_shared<playbackControls_t> (clipod::PB ()))
     , m_nowPlaying (std::make_shared<nowPlaying_t> (clipod::PB ()))
     , m_queue (std::make_shared<queue_t> ())
@@ -41,6 +42,12 @@ uiLoop_t::uiLoop_t ()
         {
             m_previousPages.push_back (m_currentPage);
             m_currentPage = m_queue;
+        });
+    m_mainMenu->gotoSettingsPage.connect (
+        [this] ()
+        {
+            m_previousPages.push_back (m_currentPage);
+            m_currentPage = m_settingsMenu;
         });
     m_artistMenu->artistSelected.connect (
         [this] (muuid::uuid const &id_)

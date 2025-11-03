@@ -6,6 +6,7 @@
 #include "nowPlaying.h"
 #include "playbackControls.h"
 #include "queue.h"
+#include "settingsMenu.h"
 #include "trackMenu.h"
 
 #include <ftxui/component/component.hpp>
@@ -27,6 +28,7 @@ private:
     std::shared_ptr<ui::artistMenu_t> m_artistMenu;
     std::shared_ptr<ui::albumMenu_t> m_albumMenu;
     std::shared_ptr<ui::trackMenu_t> m_trackMenu;
+    std::shared_ptr<ui::settingsMenu_t> m_settingsMenu;
     std::shared_ptr<ui::playbackControls_t> m_playbackControls;
     std::shared_ptr<ui::nowPlaying_t> m_nowPlaying;
     std::shared_ptr<ui::queue_t> m_queue;

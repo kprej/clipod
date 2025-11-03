@@ -12,7 +12,7 @@ mainMenu_t::~mainMenu_t ()
 }
 
 mainMenu_t::mainMenu_t ()
-    : m_items ({"Artists", "Albums"})
+    : m_items ({"Artists", "Albums", "Settings"})
     , m_selected (0)
     , m_menu ()
 {
@@ -37,4 +37,6 @@ void mainMenu_t::onEnter ()
         gotoArtistPage ();
     if (m_selected == 1)
         gotoAlbumPage ();
+    if (m_selected == 2)
+        gotoSettingsPage ();
 }

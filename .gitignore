@@ -21,3 +21,4 @@ media.db
 logs/
 .hg
 .git
+cmake

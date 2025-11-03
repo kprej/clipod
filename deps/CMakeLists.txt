@@ -29,6 +29,8 @@ set(ENABLE_EXTERNAL_LIBS ON CACHE INTERNAL "Enable EXTERNAL Libs")
 CPMAddPackage("gh:gabime/spdlog@1.8.2")
 CPMAddPackage("gh:taglib/taglib#master")
 
+CPMAddPackage("gh:marzer/tomlplusplus#master")
+
 CPMAddPackage(
     NAME ctrlc
     GIT_REPOSITORY https://github.com/evgenykislov/ctrl-c.git

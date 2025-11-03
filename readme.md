@@ -7,6 +7,8 @@ Play music from your terminal.
 A simple cross-playform cli/tui music player side project.
 >>This project is a massive WIP. Use it to look at my messy code as I clean up and change ideas etc.
 
+![Artist View] (/screenshots/ArtistView.png?raw=true "Artist View")
+![Now Playing] (/screenshots/playback.png?raw=true "Playback")
 ## Getting Started
 
 ### Dependencies
@@ -55,10 +57,10 @@ Tracks are expected to be tagged against [MusicBrainz](https://musicbrainz.org/)
 - [ ] Clean up the database code
 - [ ] Continuous smooth playback
 - [ ] Settings
-    - [ ] Music dir location
+    - [X] Music dir location
     - [ ] DB location
 - [ ] Integrate DB operations within app
-    - [ ] Scan for new tracks
+    - [X] Scan for new tracks
     - [ ] Update tracks
     - [ ] Remove tracks
 - [ ] Playlists maybe

@@ -17,6 +17,9 @@ add_executable(
     binaryButton.cpp
     binaryButton.h
 
+    fileBrowser.cpp
+    fileBrowser.h
+
     mainMenu.cpp
     mainMenu.h
 
@@ -34,6 +37,9 @@ add_executable(
 
     seekbar.cpp
     seekbar.h
+
+    settingsMenu.cpp
+    settingsMenu.h
 
     trackMenu.cpp
     trackMenu.h
